@@ -10,7 +10,7 @@ host = 'themis.ii.uni.wroc.pl'
 
 def auth():
 	with open('login_info', 'r', encoding='utf8') as f:
-		login, passwd = f.read().split('\n')
+		login, passwd = f.read().split('\n')[:2]
 
 	response = requests.post(url+'login', data={'userid': login, 'passwd': passwd}, headers={'Host': host, 'Referer': 'https://themis.ii.uni.wroc.pl/'})
 	return response.request.headers['Cookie']
