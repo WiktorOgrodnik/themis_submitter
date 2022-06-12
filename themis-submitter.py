@@ -10,10 +10,10 @@ from requests_toolbelt import MultipartEncoder
 url = 'https://themis.ii.uni.wroc.pl/'
 host = 'themis.ii.uni.wroc.pl'
 
-def auth():
-	with open('login_info', 'r', encoding='utf8') as f:
-		login, passwd = f.read().split('\n')[:2]
+login = 'Your login'
+passwd = 'Your password'
 
+def auth():
 	response = requests.post(url+'login', data={'userid': login, 'passwd': passwd}, headers={'Host': host, 'Referer': 'https://themis.ii.uni.wroc.pl/'})
 	return response.request.headers['Cookie']
 

@@ -17,7 +17,7 @@ pip install requests
 
 ## How to configure
 
-Pase your login and password into 'login_info' file (super secure)
+Pase your login and password into 'themis-submitter.py' file, lines 13 and 14 (super secure)
 
 ## How to use
 
