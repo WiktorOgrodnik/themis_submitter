@@ -1,3 +1,5 @@
+#!/bin/python
+
 import random
 import string
 from time import sleep
@@ -18,11 +20,11 @@ def auth():
 def get_groups(text: str, type: str, padding: int) -> list[str]:
 	list_of_teams = []
 	while True:
-		finded = text.find(type)
-		if finded == -1:
+		found = text.find(type)
+		if found == -1:
 			break
-		t = text[finded + padding:finded + 100].split(" ")[0]
-		text = text[finded + padding:]
+		t = text[found + padding:found + 100].split(" ")[0]
+		text = text[found + padding:]
 		if t[0] == "\"":
 			list_of_teams.append(t)
 	return list_of_teams
@@ -40,11 +42,11 @@ def print_groups(cookies: str):
 def get_tasks(text: str) -> list[str]:
 	list_of_tasks = []
 	while True:
-		finded = text.find('problem-code')
-		if finded == -1:
+		found = text.find('problem-code')
+		if found == -1:
 			break
-		t = text[finded + 13:finded + 100].split('>')[2].split('<')[0]
-		text = text[finded + 13:]
+		t = text[found + 13:found + 100].split('>')[2].split('<')[0]
+		text = text[found + 13:]
 		list_of_tasks.append(t)
 	return list_of_tasks
 
@@ -61,7 +63,10 @@ def print_results(text: str):
 	idx = 1
 	for i in text:
 		t = i.split('<td>')
-		print('{}. {}'.format(idx, t[8].split('>')[1].split('<')[0]))
+		if t[8].split('>')[1].split('<')[0] == 'accepted':
+			print('{}. {}     {}/{}'.format(idx, t[8].split('>')[1].split('<')[0], t[3].split('<')[0], t[4].split('<')[0]))
+		else:
+			print('{}. {}'.format(idx, t[8].split('>')[1].split('<')[0]))
 		idx += 1
 
 def sumbit(cookies: str, group: str, task: str, filename: str):
@@ -78,7 +83,7 @@ def sumbit(cookies: str, group: str, task: str, filename: str):
 	fields = {
 		'source': code,
 		'file': '',
-		'lang': languages[filename.split('.')[1]]
+		'lang': languages[filename.split('.')[-1]]
 	}
 	
 	boundary = '----WebKitFormBoundary'+ ''.join(random.sample(string.ascii_letters + string.digits, 16))
