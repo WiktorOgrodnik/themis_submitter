@@ -17,27 +17,21 @@ def auth():
 	response = requests.post(url+'login', data={'userid': login, 'passwd': passwd}, headers={'Host': host, 'Referer': 'https://themis.ii.uni.wroc.pl/'})
 	return response.request.headers['Cookie']
 
-def get_groups(text: str, type: str, padding: int) -> list[str]:
-	list_of_teams = []
-	while True:
-		found = text.find(type)
-		if found == -1:
-			break
-		t = text[found + padding:found + 100].split(" ")[0]
-		text = text[found + padding:]
-		if t[0] == "\"":
-			list_of_teams.append(t)
-	return list_of_teams
+def find_type(entry: str):
+	types = ['overseer', 'admin', 'user']
+
+	return any([entry.split('>')[1].split('<')[0].find(i, 0, 15) != -1 for i in types])
+
+def extract_group(entry: str):
+	return entry.split('href=')[1].split('"')[1]
+
+def get_groups(text: str):
+	return map(extract_group, filter(find_type, text.split('<div class="section-type')))
 
 def print_groups(cookies: str):
-	types = {'overseer': 35, "user": 37}
 	response = requests.get(url, headers={'Host': host, 'Cookie': cookies})
-	lst = []
-	for key in types:
-		lst += get_groups(response.text, key, types[key])
-
-	for i in lst:
-		print(i)
+	for entry in get_groups(response.text):
+		print(entry)
 
 def get_tasks(text: str) -> list[str]:
 	list_of_tasks = []
@@ -57,7 +51,11 @@ def print_tasks(cookies: str, group: str):
 	for i in lst:
 		print('\"{}\"'.format(i))
 
-def print_results(text: str):
+def print_results(ret_code: str, group: str):
+	sleep(1)
+	response = requests.get(url+group+"/result/"+ret_code, headers={'Host': host, 'Cookie': cookies})
+	text = response.text
+
 	text = text.split('<tr>')
 	text = text[2:]
 	idx = 1
@@ -113,7 +111,8 @@ def sumbit(cookies: str, group: str, task: str, filename: str):
 		response = requests.get(url+group+"/result/"+ret_code, headers=headers2)
 		if response.text.find('compiling.') == -1 and response.text.find('running') == -1 and response.text.find('waiting') == -1:
 			break
-	print_results(response.text)
+
+	print_results(ret_code, group)
 
 help_message = '''
 Welcome to The themis submitter
