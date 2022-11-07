@@ -51,11 +51,8 @@ def print_tasks(cookies: str, group: str):
 	for i in lst:
 		print('\"{}\"'.format(i))
 
-def print_results(ret_code: str, group: str):
-	sleep(1)
-	response = requests.get(url+group+"/result/"+ret_code, headers={'Host': host, 'Cookie': cookies})
-	text = response.text
-
+def print_results(text: str):
+	
 	text = text.split('<tr>')
 	text = text[2:]
 	idx = 1
@@ -109,10 +106,10 @@ def sumbit(cookies: str, group: str, task: str, filename: str):
 	while True:
 		sleep(0.25)
 		response = requests.get(url+group+"/result/"+ret_code, headers=headers2)
-		if response.text.find('compiling.') == -1 and response.text.find('running') == -1 and response.text.find('waiting') == -1:
+		if response.text.find('compiling') == -1 and response.text.find('running') == -1 and response.text.find('waiting') == -1:
 			break
 
-	print_results(ret_code, group)
+	print_results(response.text)
 
 help_message = '''
 Welcome to The themis submitter
