@@ -6,6 +6,7 @@ from time import sleep
 import requests
 import sys
 from requests_toolbelt import MultipartEncoder
+import bs4
 
 url = 'https://themis.ii.uni.wroc.pl/'
 host = 'themis.ii.uni.wroc.pl'
@@ -13,43 +14,55 @@ host = 'themis.ii.uni.wroc.pl'
 login = 'Your login'
 passwd = 'Your password'
 
+availables_types = frozenset(['overseer', 'admin', 'user'])
+
 def auth():
 	response = requests.post(url+'login', data={'userid': login, 'passwd': passwd}, headers={'Host': host, 'Referer': 'https://themis.ii.uni.wroc.pl/'})
 	return response.request.headers['Cookie']
 
-def find_type(entry: str):
-	types = ['overseer', 'admin', 'user']
+def section_available(tag: bs4.element.Tag) -> str:
+	return tag.find('div', {'class': 'section-type'}).text.strip() in availables_types
 
-	return any([entry.split('>')[1].split('<')[0].find(i, 0, 15) != -1 for i in types])
-
-def extract_group(entry: str):
-	return entry.split('href=')[1].split('"')[1]
+def section_code_and_description(tag: bs4.element.Tag):
+	code = tag.find('a', {'class': 'section-enter'})
+	return (code.get('href'), code.text)
 
 def get_groups(text: str):
-	return map(extract_group, filter(find_type, text.split('<div class="section-type')))
+	data = bs4.BeautifulSoup(text, 'html.parser')
+	for section in data.find_all('div', {'class': 'section'}):
+		if section_available(section):
+			code, description = section_code_and_description(section)
+			yield "{0} - '{1}'".format(code, description)
 
 def print_groups(cookies: str):
 	response = requests.get(url, headers={'Host': host, 'Cookie': cookies})
 	for entry in get_groups(response.text):
 		print(entry)
 
+def problem_code_and_description(tag: bs4.element.Tag):
+	code = tag.find('td', {'class': 'problem-code'})
+	desc = tag.find('td', {'class': 'problem-name'})
+	if code == None or desc == None:
+		raise LookupError
+	
+	code = code.find('a').text
+	desc = desc.find('a').text
+
+	return (code, desc)	
+
 def get_tasks(text: str) -> list[str]:
-	list_of_tasks = []
-	while True:
-		found = text.find('problem-code')
-		if found == -1:
-			break
-		t = text[found + 13:found + 100].split('>')[2].split('<')[0]
-		text = text[found + 13:]
-		list_of_tasks.append(t)
-	return list_of_tasks
+	data = bs4.BeautifulSoup(text, 'html.parser')
+	for problem in data.find_all('tr'):
+		try:
+			code, desc = problem_code_and_description(problem)
+			yield "{0} - '{1}'".format(code, desc)
+		except LookupError:
+			continue
 
 def print_tasks(cookies: str, group: str):
-	response = requests.get(url+group, headers={'Host': host, 'Cookie': cookies})
-	lst = get_tasks(response.text)
-	
-	for i in lst:
-		print('\"{}\"'.format(i))
+	response = requests.get(url + group, headers={'Host': host, 'Cookie': cookies})
+	for task in get_tasks(response.text):
+		print(task)
 
 def print_results(text: str):
 	
