@@ -7,6 +7,7 @@ import requests
 import sys
 from requests_toolbelt import MultipartEncoder
 import bs4
+from appdirs import AppDirs
 
 url = 'https://themis.ii.uni.wroc.pl/'
 host = 'themis.ii.uni.wroc.pl'
@@ -124,28 +125,33 @@ def sumbit(cookies: str, group: str, task: str, filename: str):
 
 	print_results(response.text)
 
-help_message = '''
-Welcome to The themis submitter
+def main():
 
-Options:
-'list groups' - listing groups
-'list tasks <group_name>' - listing tasks in given groupname
-'submit <group_name> <task_name> <path_to_src>' - submiting code and prinitng results
+	help_message = '''
+	Welcome to The themis submitter
 
-ver. 2.71828182...
-'''
+	Options:
+	'list groups' - listing groups
+	'list tasks <group_name>' - listing tasks in given groupname
+	'submit <group_name> <task_name> <path_to_src>' - submiting code and prinitng results
 
-if (len(sys.argv) == 1):
-	print(help_message)
+	ver. 2.71828182...
+	'''
 
-if (len(sys.argv) == 3 and sys.argv[1] == 'list' and sys.argv[2] == 'groups'):
-	cookies = auth()
-	print_groups(cookies)
+	if (len(sys.argv) == 1):
+		print(help_message)
 
-if (len(sys.argv) == 4 and sys.argv[1] == 'list' and sys.argv[2] == 'tasks'):
-	cookies = auth()
-	print_tasks(cookies, sys.argv[3])
+	if (len(sys.argv) == 3 and sys.argv[1] == 'list' and sys.argv[2] == 'groups'):
+		cookies = auth()
+		print_groups(cookies)
 
-if (len(sys.argv) == 5 and sys.argv[1] == 'submit'):
-	cookies = auth()
-	sumbit(cookies, sys.argv[2], sys.argv[3], sys.argv[4])
+	if (len(sys.argv) == 4 and sys.argv[1] == 'list' and sys.argv[2] == 'tasks'):
+		cookies = auth()
+		print_tasks(cookies, sys.argv[3])
+
+	if (len(sys.argv) == 5 and sys.argv[1] == 'submit'):
+		cookies = auth()
+		sumbit(cookies, sys.argv[2], sys.argv[3], sys.argv[4])
+
+if __name__ == "__main__":
+	main()

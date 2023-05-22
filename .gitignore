@@ -1,1 +1,7 @@
 .vscode
+
+# python setup files
+.venv
+*.egg-info
+dist
+build

@@ -4,16 +4,8 @@ Command-line tool to test your solutions in the best on-line problem judge - the
 
 ## How to install
 
-You will need:
-
-- Python 3.x
-- requests library
-- requests_toolbelt library
-
 ```bash
-pip install requests
-pip install requests_toolbelt
-pip install bs4
+pip install .
 ```
 
 ## How to configure
